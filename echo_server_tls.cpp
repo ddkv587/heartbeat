@@ -4,6 +4,8 @@
 
 #include <iostream>
 
+5e873d24-8b9a-593b-912e-066c0dfb1923
+
 typedef websocketpp::server<websocketpp::config::asio_tls> server;
 
 using websocketpp::lib::placeholders::_1;
