@@ -4,8 +4,6 @@
 
 #include <iostream>
 
-5e873d24-8b9a-593b-912e-066c0dfb1923
-
 typedef websocketpp::server<websocketpp::config::asio_tls> server;
 
 using websocketpp::lib::placeholders::_1;
@@ -18,8 +16,15 @@ typedef websocketpp::lib::shared_ptr<websocketpp::lib::asio::ssl::context> conte
 class CConfigCertificate
 {
 public:
-    CConfigCertificate();
-    virtual ~CConfigCertificate();
+    CConfigCertificate()
+    {
+        ;
+    }
+
+    virtual ~CConfigCertificate()
+    {
+        ;
+    }
 
     inline void                         certificateChainPath( const ::std::string& strPath )            { m_strCertificateChainPath = strPath; }
     inline const ::std::string&         certificateChainPath() const                                    { return m_strCertificateChainPath; }
@@ -78,13 +83,16 @@ public:
     {
         ;
     }
-    virtual ~CConfig();
+    virtual ~CConfig()
+    {
+        ;
+    }
 
     void                                initilalize()
     {
-        m_certificateConfig.certificateChainPath( "server.pem" );
-        m_certificateConfig.privateKeyPath( "server.pem" );
-        m_certificateConfig.dhparamPath( "dh.pem" );
+        m_certificateConfig.certificateChainPath( "./server.pem" );
+        m_certificateConfig.privateKeyPath( "./server.pem" );
+        m_certificateConfig.dhparamPath( "./dh.pem" );
     }
 
     inline void                         port( unsigned short iPort )                    { m_iPort = iPort; }
@@ -95,10 +103,11 @@ public:
 
     inline void                         password( const ::std::string& strPassword )    { m_strPassword = strPassword; }
     inline const ::std::string&         password() const                                { return m_strPassword; }
+    ::std::string                       passwordcbk( std::size_t max_length, asio::ssl::context::password_purpose purpose ) const { return m_strPassword; }
 
     inline const CConfigCertificate&    certificate() const                             { return m_certificateConfig; }
 
-    inline const ::std::string&         ciphers( ETlsMode mode )
+    inline ::std::string                ciphers( ETlsMode mode )
     {
         if ( TM_MOZILLA_INTERMEDIATE == mode ) {
             return "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!3DES:!MD5:!PSK";
@@ -108,13 +117,13 @@ public:
     }
 
 protected:
-    void delete( void* ptr )
-    {
-        if ( NULL != ptr ) {
-            ::delete ptr;
-            ptr = NULL;
-        }
-    }
+    // void operator delete( void* ptr )
+    // {
+    //     if ( NULL != ptr ) {
+    //         ::delete ptr;
+    //         ptr = NULL;
+    //     }
+    // }
 
 private:
     static CConfig*                     s_pInstance;
@@ -130,10 +139,17 @@ CConfig* CConfig::s_pInstance = NULL;
 class CHeartBeat
 {
 public:
-    CHeartBeat();
-    virtual ~CHeartBeat();
+    CHeartBeat()
+    {
+        ;
+    }
 
-    boolean initilalize()
+    virtual ~CHeartBeat()
+    {
+        ;
+    }
+
+    bool initilalize()
     {
         // Set logging settings
         m_server.set_error_channels(websocketpp::log::elevel::all);
@@ -155,7 +171,7 @@ public:
     {
         m_server.set_message_handler( bind( &CHeartBeat::onMessage, this, ::_1, ::_2 ) );
         m_server.set_http_handler( bind( &CHeartBeat::onHttp, this, ::_1 ) );
-        m_server.set_tls_init_handler( bind( &CHeartBeat::onTlsInit, this, MOZILLA_INTERMEDIATE, ::_1 ) );
+        m_server.set_tls_init_handler( bind( &CHeartBeat::onTlsInit, this, CConfig::TM_MOZILLA_INTERMEDIATE, ::_1 ) );
     }
 
     void unregisterHander()
@@ -190,7 +206,7 @@ protected:
         }
     }
 
-    virtual void onHttp( websocketpp::connection_hdl hd) 
+    virtual void onHttp( websocketpp::connection_hdl hdl ) 
     {
         server::connection_ptr con = m_server.get_con_from_hdl(hdl);
         
@@ -198,17 +214,17 @@ protected:
         con->set_status(websocketpp::http::status_code::ok);
     }
 
-    virtual context_ptr onTlsInit( tls_mode mode, websocketpp::connection_hdl hdl ) 
+    virtual context_ptr onTlsInit( CConfig::ETlsMode mode, websocketpp::connection_hdl hdl ) 
     {
         namespace asio = websocketpp::lib::asio;
 
         std::cout << "on_tls_init called with hdl: " << hdl.lock().get() << std::endl;
-        std::cout << "using TLS mode: " << ( MOZILLA_MODERN == mode ? "Mozilla Modern" : "Mozilla Intermediate" ) << std::endl;
+        std::cout << "using TLS mode: " << ( CConfig::TM_MOZILLA_MODERN == mode ? "Mozilla Modern" : "Mozilla Intermediate" ) << std::endl;
 
         context_ptr ctx = websocketpp::lib::make_shared< asio::ssl::context >( asio::ssl::context::sslv23 );
 
         try {
-            if ( MOZILLA_MODERN == mode ) {
+            if ( CConfig::TM_MOZILLA_MODERN == mode ) {
                 // Modern disables TLSv1
                 ctx->set_options(asio::ssl::context::default_workarounds |
                                 asio::ssl::context::no_sslv2 |
@@ -221,10 +237,10 @@ protected:
                                 asio::ssl::context::no_sslv3 |
                                 asio::ssl::context::single_dh_use);
             }
-            ctx->set_password_callback( bind( &CConfig::password, CConfig::getInstance ) );
-            ctx->use_certificate_chain_file( CConfig::getInstance()->certificate().certificateChainPath );
-            ctx->use_private_key_file( CConfig::getInstance()->certificate().privateKeyPath, asio::ssl::context::pem);
-            ctx->use_tmp_dh_file( CConfig::getInstance()->certificate().dhparamPath );
+            ctx->set_password_callback( bind( &CConfig::passwordcbk, CConfig::getInstance(), 256, asio::ssl::context::for_reading )  );
+            ctx->use_certificate_chain_file( CConfig::getInstance()->certificate().certificateChainPath() );
+            ctx->use_private_key_file( CConfig::getInstance()->certificate().privateKeyPath(), asio::ssl::context::pem );
+            ctx->use_tmp_dh_file( CConfig::getInstance()->certificate().dhparamPath() );
             
             if ( SSL_CTX_set_cipher_list( ctx->native_handle(), CConfig::getInstance()->ciphers( mode ).c_str() ) != 1 ) {
                 std::cout << "Error setting cipher list" << std::endl;
