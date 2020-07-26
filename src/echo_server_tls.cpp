@@ -88,7 +88,7 @@ public:
         ;
     }
 
-    void                                initilalize()
+    void initilalize()
     {
         m_certificateConfig.certificateChainPath( "./server.pem" );
         m_certificateConfig.privateKeyPath( "./server.pem" );
@@ -160,6 +160,8 @@ public:
 
         // register handle
         registerHandle();
+
+		return true;
     }
 
     void unInitilalize()
