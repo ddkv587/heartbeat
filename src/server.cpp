@@ -59,7 +59,7 @@ public:
     };
 
 public:
-    static CConfig*                     getInstance()
+    static CConfig* getInstance()
     {
         if ( NULL == s_pInstance ) {
             s_pInstance = new CConfig;
@@ -68,7 +68,7 @@ public:
         return s_pInstance;
     }
 
-    static void                         delInstance()
+    static void delInstance()
     {
         if ( NULL != s_pInstance ) {
             delete s_pInstance;
@@ -79,10 +79,11 @@ public:
     CConfig()
         : m_iPort( 8080 )
         , m_strName( "admin" )
-        , m_strPassword( "admin" )
+        , m_strPassword( "ddkV587" )
     {
-        ;
+        initilalize();
     }
+
     virtual ~CConfig()
     {
         ;
@@ -90,8 +91,8 @@ public:
 
     void initilalize()
     {
-        m_certificateConfig.certificateChainPath( "./server.pem" );
-        m_certificateConfig.privateKeyPath( "./server.pem" );
+        m_certificateConfig.certificateChainPath( "./nibiru.com.cert.pem" );
+        m_certificateConfig.privateKeyPath( "./nibiru.com.key.pem" );
         m_certificateConfig.dhparamPath( "./dh.pem" );
     }
 
@@ -248,7 +249,11 @@ protected:
                 std::cout << "Error setting cipher list" << std::endl;
             }
         } catch ( std::exception& e ) {
-            std::cout << "Exception: " << e.what() << std::endl;
+            std::cout << "onTlsInit Exception: " << e.what() 
+						<< " , chain: " << CConfig::getInstance()->certificate().certificateChainPath()
+						<< " , private: " << CConfig::getInstance()->certificate().privateKeyPath()
+						<< " , dh " << CConfig::getInstance()->certificate().dhparamPath()
+						<< std::endl;
         }
         return ctx;
     }
@@ -258,10 +263,13 @@ private:
 };
 
 
-int main() {
+int main() 
+{
     CHeartBeat hb;
 
     hb.initilalize();
 
     hb.run();
+
+	return 0;
 }

@@ -1,13 +1,14 @@
 include $(CLEAR_VARS)
 
-TARGET_MODULE  := heartbeat
+TARGET_MODULE  := client
 
 CPP_INCLUDE    := -I$(SOURCE_ROOT) \
                   -I$(SYSROOT)/usr/include
 CPP_SRCDIR     := $(SOURCE_ROOT)
 
-CPP_SRC        := $(shell find $(CPP_SRCDIR) -name "*.cpp")
-C_SRC          := $(shell find $(CPP_SRCDIR) -name "*.c")
+#CPP_SRC        := $(shell find $(CPP_SRCDIR) -name "*.cpp")
+#C_SRC          := $(shell find $(CPP_SRCDIR) -name "*.c")
+CPP_SRC        := $(shell find $(CPP_SRCDIR) -name "client.cpp")
 
 LIBS           += -lssl -lcrypto
 LIBS_DIR       += -L$(ROOT_PATH)/target/$(PLATFROM)/$(PROJECT_NAME)/Release

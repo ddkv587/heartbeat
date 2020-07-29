@@ -51,7 +51,8 @@ do_make()
 	fi
 }
 
-do_make heartbeat
+do_make server
+do_make client
 
 echo
 echo ------------ make-$MAKE_ACTION Success! ------------
