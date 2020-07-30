@@ -12,11 +12,11 @@ using websocketpp::lib::placeholders::_2;
 using websocketpp::lib::bind;
 
 void on_open( client* c, websocketpp::connection_hdl hdl ) {
-    c->send( hdl, "open", size_t( 5 ) );
+    c->send( hdl, "hello, world!", size_t(14), websocketpp::frame::opcode::text );
 }
 
 void on_message(websocketpp::connection_hdl, client::message_ptr msg) {
-    std::cout << msg->get_payload() << std::endl;
+    std::cout << "on_message: " << msg->get_payload() << std::endl;
 }
 
 /// Verify that one of the subject alternative names matches the given hostname
@@ -26,6 +26,7 @@ bool verify_subject_alternative_name(const char * hostname, X509 * cert) {
     
     san_names = (STACK_OF(GENERAL_NAME) *) X509_get_ext_d2i(cert, NID_subject_alt_name, NULL, NULL);
     if (san_names == NULL) {
+		::std::cout << "verify_subject_alternative_name return false" << ::std::endl;
         return false;
     }
     
@@ -50,7 +51,7 @@ bool verify_subject_alternative_name(const char * hostname, X509 * cert) {
         result = (strcasecmp(hostname, dns_name) == 0);
     }
     sk_GENERAL_NAME_pop_free(san_names, GENERAL_NAME_free);
-	::std::cout << "verify_subject_alternative_name end: " << result << ::std::endl;
+	::std::cout << "verify_subject_alternative_name end san: " << san_names << ", free: " << GENERAL_NAME_free << ", result: " << result << ::std::endl;
     
     return result;
 }

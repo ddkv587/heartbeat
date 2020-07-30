@@ -201,6 +201,9 @@ protected:
                 << " and message: " << msg->get_payload()
                 << std::endl;
 
+        server::connection_ptr con = m_server.get_con_from_hdl(hdl);
+		std::cout << "on_message remote: " << con->get_remote_endpoint() << ::std::endl;
+
         try {
             m_server.send( hdl, msg->get_payload(), msg->get_opcode() );
         } catch (websocketpp::exception const & e) {
@@ -211,9 +214,20 @@ protected:
 
     virtual void onHttp( websocketpp::connection_hdl hdl ) 
     {
+        std::cout << "on_http called with hdl: " << hdl.lock().get() << ::std::endl;
+		
         server::connection_ptr con = m_server.get_con_from_hdl(hdl);
+
+		std::cout << "on_http remote: " << con->get_remote_endpoint() 
+					<< ", host: " 							<< con->get_host() 
+					<< ", uri: "    						<< con->get_uri()->str()
+					<< ", request header real ip: " 		<< con->get_request_header("X-Real-IP")
+					<< ", request header forward for: " 	<< con->get_request_header("X-Forwarded-For")
+					<< ", request header forward proto: " 	<< con->get_request_header("X-Forwarded-Proto")
+					<< ", request body: " 					<< con->get_request_body()
+					<<  ::std::endl;
         
-        con->set_body("Hello World!");
+        con->set_body("Hello World!!!!");
         con->set_status(websocketpp::http::status_code::ok);
     }
 
