@@ -52,7 +52,6 @@ do_make()
 }
 
 do_make server
-do_make client
 
 echo
 echo ------------ make-$MAKE_ACTION Success! ------------
