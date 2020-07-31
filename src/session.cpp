@@ -1,9 +1,9 @@
 #include <chrono>
 #include <ctime>
-#include <regex>
 
-#include "session.hpp"
 #include "config.hpp"
+#include "command.hpp"
+#include "session.hpp"
 
 const static int MAGIC_CMD_TYPE_MASK        = (size_t)0xFFFFFFFF;
 const static int MAGIC_CMD_TYPE_UPDATE_DNS  = 0x10100101;
@@ -48,17 +48,19 @@ namespace HeartBeat
                 // update dns
                 ::std::cout << "begin to update dns with ip:" << strIP<< ::std::endl;
 
-                ::std::string strCmdZoneID      = "curl -s -X GET \"https://api.cloudflare.com/client/v4/zones?name=" + CConfig::getInstance()->zoneName() + "&status=active\" \
-                                                    -H \"Authorization: Bearer " + CConfig::getInstance()->authorization() + "\" \
-                                                    -H \"Content-Type: application/json\" | jq -r '{\"result\"}[] | .[0] | .id'";
-                ::std::string strZoneID         = ::cmd_exec( strCmdZoneID );
-                strZoneID = ::std::regex_replace( strZoneID, std::regex("\n+"), "" );
+                // ::std::string strCmdZoneID      = "curl -s -X GET \"https://api.cloudflare.com/client/v4/zones?name=" + CConfig::getInstance()->zoneName() + "&status=active\" \
+                //                                     -H \"Authorization: Bearer " + CConfig::getInstance()->authorization() + "\" \
+                //                                     -H \"Content-Type: application/json\" | jq -r '{\"result\"}[] | .[0] | .id'";
+                // ::std::string strZoneID         = ::cmd_exec( strCmdZoneID );
+                // strZoneID = ::std::regex_replace( strZoneID, std::regex("\n+"), "" );
+                ::std::string strZoneID = CCommand::chop( CCommand::getZoneID( CConfig::getInstance()->zoneName(), CConfig::getInstance()->authorization() ) );
 
-                ::std::string strCmdRecordID    = "curl -s -X GET \"https://api.cloudflare.com/client/v4/zones/" + strZoneID + "/dns_records?type=A&name=" + CConfig::getInstance()->recordName() + "\" \
-                                                    -H \"Authorization: Bearer " + CConfig::getInstance()->authorization() + "\" \
-                                                    -H \"Content-Type: application/json\" | jq -r '{\"result\"}[] | .[0] | .id'";
-                ::std::string strRecordID       = ::cmd_exec( strCmdRecordID );
-                strRecordID = ::std::regex_replace( strZoneID, std::regex("\n+"), "" );
+                // ::std::string strCmdRecordID    = "curl -s -X GET \"https://api.cloudflare.com/client/v4/zones/" + strZoneID + "/dns_records?type=A&name=" + CConfig::getInstance()->recordName() + "\" \
+                //                                     -H \"Authorization: Bearer " + CConfig::getInstance()->authorization() + "\" \
+                //                                     -H \"Content-Type: application/json\" | jq -r '{\"result\"}[] | .[0] | .id'";
+                // ::std::string strRecordID       = ::cmd_exec( strCmdRecordID );
+                // strRecordID = ::std::regex_replace( strZoneID, std::regex("\n+"), "" );
+                ::std::string strRecordID = CCommand::chop( CCommand::getRecordID( strZoneID, CConfig::getInstance()->recordName(), CConfig::getInstance()->authorization() ) );
 
                 ::std::cout << "strCmdZoneID: "     << strCmdZoneID     << ::std::endl
                             << "strZoneID: "        << strZoneID        << ::std::endl
