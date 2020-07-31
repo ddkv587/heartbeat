@@ -48,23 +48,11 @@ namespace HeartBeat
                 // update dns
                 ::std::cout << "begin to update dns with ip:" << strIP<< ::std::endl;
 
-                // ::std::string strCmdZoneID      = "curl -s -X GET \"https://api.cloudflare.com/client/v4/zones?name=" + CConfig::getInstance()->zoneName() + "&status=active\" \
-                //                                     -H \"Authorization: Bearer " + CConfig::getInstance()->authorization() + "\" \
-                //                                     -H \"Content-Type: application/json\" | jq -r '{\"result\"}[] | .[0] | .id'";
-                // ::std::string strZoneID         = ::cmd_exec( strCmdZoneID );
-                // strZoneID = ::std::regex_replace( strZoneID, std::regex("\n+"), "" );
                 ::std::string strZoneID = CCommand::chop( CCommand::getZoneID( CConfig::getInstance()->zoneName(), CConfig::getInstance()->authorization() ) );
 
-                // ::std::string strCmdRecordID    = "curl -s -X GET \"https://api.cloudflare.com/client/v4/zones/" + strZoneID + "/dns_records?type=A&name=" + CConfig::getInstance()->recordName() + "\" \
-                //                                     -H \"Authorization: Bearer " + CConfig::getInstance()->authorization() + "\" \
-                //                                     -H \"Content-Type: application/json\" | jq -r '{\"result\"}[] | .[0] | .id'";
-                // ::std::string strRecordID       = ::cmd_exec( strCmdRecordID );
-                // strRecordID = ::std::regex_replace( strZoneID, std::regex("\n+"), "" );
                 ::std::string strRecordID = CCommand::chop( CCommand::getRecordID( strZoneID, CConfig::getInstance()->recordName(), CConfig::getInstance()->authorization() ) );
 
-                ::std::cout << "strCmdZoneID: "     << strCmdZoneID     << ::std::endl
-                            << "strZoneID: "        << strZoneID        << ::std::endl
-                            << "strCmdRecordID: "   << strCmdRecordID   << ::std::endl
+                ::std::cout << "strZoneID: "        << strZoneID        << ::std::endl
                             << "strRecordID: "      << strRecordID      << ::std::endl;
             }
         }

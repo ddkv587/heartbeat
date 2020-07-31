@@ -2,7 +2,6 @@
 #define DEF__COMMAND_HPP__
 
 #include <string.h>
-#include <format>
 #include <regex>
 
 namespace HeartBeat
@@ -10,13 +9,9 @@ namespace HeartBeat
     class CCommand
     {
     private:
-        const static ::std::string s_strZoneIDFormat = "curl -s -X GET \"https://api.cloudflare.com/client/v4/zones?name=%s&status=active\" \
-                                                        -H \"Authorization: Bearer %s\" \
-                                                        -H \"Content-Type: application/json\" | jq -r '{\"result\"}[] | .[0] | .id'";
+        static const ::std::string s_strZoneIDFormat;
+        static const ::std::string s_strRecordIDFormat;
         
-        const static ::std::string s_strRecordIDFormat = "curl -s -X GET \"https://api.cloudflare.com/client/v4/zones/%s/dns_records?type=A&name=%s\" \
-                                                            -H \"Authorization: Bearer %s\" \
-                                                            -H \"Content-Type: application/json\" | jq -r '{\"result\"}[] | .[0] | .id'";
     public:
         static ::std::string getZoneID( const ::std::string& strZoneName, const ::std::string& strAuthorization )
         {
@@ -36,13 +31,13 @@ namespace HeartBeat
             ::std::string strCmd = format( s_strRecordIDFormat, strZoneID, strRecordName, strAuthorization );
 
             if ( strCmd.empty() ) return ::std::string();
-            
+
             return execute( strCmd );
         }
 
         static ::std::string chop(const ::std::string& str )
         {
-            ::std::regex_replace( str, std::regex("\n+"), "" );
+            return ::std::regex_replace( str, std::regex("\n+"), "" );
         }
 
     private:
