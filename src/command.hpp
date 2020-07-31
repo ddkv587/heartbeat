@@ -20,9 +20,11 @@ namespace HeartBeat
     public:
         static ::std::string getZoneID( const ::std::string& strZoneName, const ::std::string& strAuthorization )
         {
-            if ( strZoneName.empty() || strAuthorization.empty() )  return ::std::string();
+            if ( strZoneName.empty() || strAuthorization.empty() ) return ::std::string();
 
-            ::std::string strCmd = ::std::format( s_strZoneIDFormat, strZoneName, strAuthorization );
+            ::std::string strCmd = format( s_strZoneIDFormat, strZoneName, strAuthorization );
+
+            if ( strCmd.empty() ) return ::std::string();
 
             return execute( strCmd );
         }
@@ -31,8 +33,10 @@ namespace HeartBeat
         {
             if ( strZoneID.empty() || strRecordName.empty() || strAuthorization.empty() )  return ::std::string();
 
-            ::std::string strCmd = ::std::format( s_strRecordIDFormat, strZoneID, strRecordName, strAuthorization );
+            ::std::string strCmd = format( s_strRecordIDFormat, strZoneID, strRecordName, strAuthorization );
 
+            if ( strCmd.empty() ) return ::std::string();
+            
             return execute( strCmd );
         }
 
@@ -54,6 +58,18 @@ namespace HeartBeat
                 result += buffer.data();
             }
             return result;
+        }
+
+        template<typename ... Args>
+        std::string format( const std::string& format, Args ... args )
+        {
+            size_t size = snprintf( nullptr, 0, format.c_str(), args ... ) + 1; // Extra space for '\0'
+            if ( size <= 0 ) { 
+                return ::std::string();
+            }
+            std::unique_ptr<char*> buf( new char[ size ] ); 
+            snprintf( buf.get(), size, format.c_str(), args ... );
+            return std::string( buf.get(), buf.get() + size - 1 ); // We don't want the '\0' inside
         }
     };
 }
