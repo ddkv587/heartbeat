@@ -17,6 +17,7 @@ namespace HeartBeat
         virtual void                onMessage( _server* sever, ::websocketpp::connection_hdl hdl, _message_ptr msg ) = 0;
         virtual void                onHttp( _server* sever, websocketpp::connection_hdl hdl ) = 0;
         virtual _context_ptr        onTlsInit( _server* sever, CConfig::ETlsMode mode, websocketpp::connection_hdl hdl ) = 0;
+        virtual void                onShutdown(  _server* sever, ::websocketpp::connection_hdl hdl ) = 0;
     };
 
     class CHeartBeatSession : public ISession
@@ -34,12 +35,12 @@ namespace HeartBeat
 
         virtual void onOpen( _server* sever, ::websocketpp::connection_hdl hdl )
         {
-            ;
+            ::std::cout << " onOpen called!!! " << ::std::endl;
         }
 
         virtual void onClose( _server* sever,::websocketpp::connection_hdl hdl )
         {
-            ;
+            ::std::cout << " onClose called!!! " << ::std::endl;
         }
 
         virtual void onMessage( _server* sever, websocketpp::connection_hdl hdl, _message_ptr msg ) 
@@ -99,7 +100,13 @@ namespace HeartBeat
                             << " , dh " << CConfig::getInstance()->certificate().dhparamPath()
                             << std::endl;
             }
+
             return ctx;
+        }
+
+        virtual void onShutdown(  _server* sever, ::websocketpp::connection_hdl hdl )
+        {
+            ::std::cout << " onTermination called!!! " << ::std::endl;
         }
 
     private:

@@ -68,26 +68,24 @@ namespace HeartBeat
             }
         }
 
-        CConfig()
-            : m_iPort( 8080 )
-            , m_strName( "admin" )
-            , m_strPassword( "ddkV587" )
-            , m_strAuthorization( "Ue5Szx2T432lFzkFcC6IJodAvlpqHcus0BedI8iQ" )
-        {
-            initilalize();
-        }
-
-        virtual ~CConfig()
-        {
-            ;
-        }
-
         void initilalize()
         {
+            m_iPort     = 8080;
+            m_strName   = "admin";
             m_certificateConfig.certificateChainPath( "./nibiru.com.cert.pem" );
             m_certificateConfig.privateKeyPath( "./nibiru.com.key.pem" );
             m_certificateConfig.dhparamPath( "./dh.pem" );
+
+            loadConfig();
         }
+
+        void uninitilalize()
+        {
+            saveConfig();
+        }
+
+        bool                                loadConfig( const ::std::string& strConfigPath = "./config.json" );
+        void                                saveConfig( const ::std::string& strConfigPath = "./config.json" );
 
         inline void                         port( unsigned short iPort )                    { m_iPort = iPort; }
         inline unsigned short               port()                                          { return m_iPort; }
@@ -114,6 +112,16 @@ namespace HeartBeat
         }
 
     protected:
+        CConfig()
+        {
+            initilalize();
+        }
+
+        virtual ~CConfig()
+        {
+            uninitilalize();
+        }
+
         // void operator delete( void* ptr )
         // {
         //     if ( NULL != ptr ) {
