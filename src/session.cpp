@@ -42,18 +42,51 @@ namespace HeartBeat
 
         if ( !con->get_request_header( "X-Request-CMD" ).empty() ) {
             int cmdType         = ::std::stoi( con->get_request_header( "X-Request-CMD" ), 0, 16 );
-            ::std::string strIP = con->get_request_header( "X-Real-IP" );
 
             if ( MAGIC_CMD_TYPE_UPDATE_DNS == ( cmdType & MAGIC_CMD_TYPE_MASK ) ) {
-                // update dns
-                ::std::cout << "begin to update dns with ip:" << strIP<< ::std::endl;
+                // request
+                ::std::string strZoneName   = con->get_request_header( "X-Request-DNS-ZoneName" );
+                ::std::string strRecordName = con->get_request_header( "X-Request-DNS-RecordName" );
+                
+                // optional
+                ::std::string strType       = con->get_request_header( "X-Request-DNS-Type" );
+                ::std::string strDomain     = con->get_request_header( "X-Request-DNS-Domain" );
+                ::std::string strIP         = con->get_request_header( "X-Request-DNS-IP" );
+                ::std::string strTTL        = con->get_request_header( "X-Request-DNS-TTL" );
+                ::std::string strProxy      = con->get_request_header( "X-Request-DNS-Proxy" );
 
-                ::std::string strZoneID = CCommand::chop( CCommand::getZoneID( CConfig::getInstance()->zoneName(), CConfig::getInstance()->authorization() ) );
+                if ( strZoneName.empty() || strRecordName.empty() ) {
+                    ::std::cout << "update dns error with empty "
+                                << " zone name "        << strZoneName          <<  ::std::endl
+                                << " Record name "      << strRecordName        <<  ::std::endl;
+                } else {
+                    // update dns
+                    CDNSCommand::tagRecord  record;
+                    record.strZoneID    = CCommand::chop( CDNSCommand::getZoneID( strZoneName, CConfig::getInstance()->authorization() ) );
+                    record.strRecordID  = CCommand::chop( CDNSCommand::getRecordID( record.strZoneID, strRecordName, CConfig::getInstance()->authorization() ) );
+                    record.strDomain    = strRecordName;
+                    record.strIP        = con->get_request_header( "X-Real-IP" );
 
-                ::std::string strRecordID = CCommand::chop( CCommand::getRecordID( strZoneID, CConfig::getInstance()->recordName(), CConfig::getInstance()->authorization() ) );
+                    if ( record.isNull() ) {
+                        ::std::cout << "update dns error with " 
+                                    << " zone ID "      << record.strZoneID     <<  ::std::endl
+                                    << " Record ID "    << record.strRecordID   <<  ::std::endl
+                                    << " domain "       << record.strDomain     <<  ::std::endl
+                                    << " ip "           << record.strIP         <<  ::std::endl;
+                    } else {
+                        if ( !strType.empty() )         record.strDNSType   = strType;
+                        if ( !strDomain.empty() )       record.strDomain    = strDomain;
+                        if ( !strIP.empty() )           record.strIP        = strIP;
+                        if ( !strTTL.empty() )          record.uiTTL        = ::std::atoi( strTTL.c_str() );
+                        if ( !strProxy.empty() )        record.bProxied     = ( ( strProxy == "true" ) || ( strProxy == "TRUE" ) );
 
-                ::std::cout << "strZoneID: "        << strZoneID        << ::std::endl
-                            << "strRecordID: "      << strRecordID      << ::std::endl;
+                        ::std::cout << "begin to update dns " << record.strDomain << " with ip: " << record.strIP << ::std::endl;
+
+                        if ( !CDNSCommand::updateDNSRecord( record, CConfig::getInstance()->authorization() ) ) {
+                            ::std::cout << "update dns error with updateDNSRecord" << ::std::endl;
+                        }
+                    }
+                }
             }
         }
         

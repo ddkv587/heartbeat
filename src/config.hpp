@@ -72,9 +72,7 @@ namespace HeartBeat
             : m_iPort( 8080 )
             , m_strName( "admin" )
             , m_strPassword( "ddkV587" )
-            , m_strZoneName( "ddkv587.tk" )
-            , m_strRecordName( "ddkv587.tk" )
-            , m_strAuthorization( "E-XegF9kVShj31fLqxFDl7ACB-uBE4bWwcOJswBJ" )
+            , m_strAuthorization( "Ue5Szx2T432lFzkFcC6IJodAvlpqHcus0BedI8iQ" )
         {
             initilalize();
         }
@@ -100,12 +98,6 @@ namespace HeartBeat
         inline void                         password( const ::std::string& strPassword )    { m_strPassword = strPassword; }
         inline const ::std::string&         password() const                                { return m_strPassword; }
         ::std::string                       passwordcbk( std::size_t max_length, asio::ssl::context::password_purpose purpose ) const { return m_strPassword; }
-
-        inline void                         zoneName( const ::std::string& strName )        { m_strZoneName = strName; }
-        inline const ::std::string&         zoneName() const                                { return m_strZoneName; }
-
-        inline void                         recordName( const ::std::string& strName )      { m_strRecordName = strName; }
-        inline const ::std::string&         recordName() const                              { return m_strRecordName; }
 
         inline void                         authorization( const ::std::string& strKey )    { m_strAuthorization = strKey; }
         inline const ::std::string&         authorization() const                           { return m_strAuthorization; }
@@ -138,9 +130,7 @@ namespace HeartBeat
         ::std::string                       m_strName;
         ::std::string                       m_strPassword;
 
-        // for dns
-        ::std::string                       m_strZoneName;
-        ::std::string                       m_strRecordName;
+        // for dns authorization
         ::std::string                       m_strAuthorization;
 
         CConfigCertificate                  m_certificateConfig;
