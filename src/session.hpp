@@ -1,6 +1,8 @@
 #ifndef DEF__SESSION_HPP__
 #define DEF__SESSION_HPP__
 
+#include <map>
+
 #include "common.hpp"
 #include "config.hpp"
 
@@ -112,6 +114,8 @@ namespace HeartBeat
     private:
         int     m_interval;         // request interval
         int     m_timeout;
+
+        ::std::map< ::std::string, ::std::string >  m_mapDomains;
     };
 }
 #endif
