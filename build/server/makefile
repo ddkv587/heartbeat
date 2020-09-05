@@ -9,7 +9,7 @@ CPP_SRCDIR     := $(SOURCE_ROOT)
 CPP_SRC        := $(shell find $(CPP_SRCDIR) -name "*.cpp")
 C_SRC          := $(shell find $(CPP_SRCDIR) -name "*.c")
 
-LIBS           += -lssl -lcrypto -ljsoncpp
+LIBS           += -lssl -lcrypto -ljsoncpp -lsqlite3
 LIBS_DIR       += -L$(ROOT_PATH)/target/$(PLATFROM)/$(PROJECT_NAME)/Release
 LIBS_DIR_DEBUG += -L$(ROOT_PATH)/target/$(PLATFROM)/$(PROJECT_NAME)/Debug
 

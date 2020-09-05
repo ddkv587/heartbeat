@@ -2,9 +2,9 @@
 
 namespace HeartBeat
 {
-    const ::std::string CSqlLiteDB::s_strSQLCreate = "CREATE TABLE ? ( ? )";
-    const ::std::string CSqlLiteDB::s_strSQLInsert = "INSERT INTO ? ( ? ) VALUES( ? )";
-    const ::std::string CSqlLiteDB::s_strSQLUpdate = "UPDATE ? SET ? WHERE ?";
-    const ::std::string CSqlLiteDB::s_strSQLDelete = "DELETE FROM ? WHERE ?";
-    const ::std::string CSqlLiteDB::s_strSQLRead   = "SELECT ? FROM ? WHERE ?";
+    const ::std::string IDBInterface::s_strSQLCreate = "CREATE TABLE %table_name% ( %column_list% )";
+    const ::std::string IDBInterface::s_strSQLInsert = "INSERT INTO %table_name% ( %column_list% ) VALUES( %value_list% );";
+    const ::std::string IDBInterface::s_strSQLUpdate = "UPDATE %table_name% SET %set_list% WHERE %where_list%";
+    const ::std::string IDBInterface::s_strSQLDelete = "DELETE FROM %table_name% WHERE %where_list%";
+    const ::std::string IDBInterface::s_strSQLRead   = "SELECT %column_list% FROM %table_name% WHERE %where_list%";
 }

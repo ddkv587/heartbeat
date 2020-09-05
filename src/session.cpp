@@ -30,7 +30,7 @@ namespace HeartBeat
         
         _server::connection_ptr con = sever->get_con_from_hdl( hdl );
 
-        std::cout   << "on_http remote: "                   << con->get_remote_endpoint() 
+        std::cout << "on_http remote: "                   << con->get_remote_endpoint() 
                     << ", host: " 							<< con->get_host() 
                     << ", uri: "    						<< con->get_uri()->str()
                     << ", request header real ip: " 		<< con->get_request_header( "X-Real-IP" )
@@ -59,51 +59,37 @@ namespace HeartBeat
                     ::std::cout << "update dns error with empty "
                                 << " zone name "        << strZoneName          <<  ::std::endl
                                 << " Record name "      << strRecordName        <<  ::std::endl;
-                } else {
-                    // update dns
-                    CDNSCommand::tagRecord  record;
-                    record.strDomain    = strRecordName;
-                    record.strIP        = con->get_request_header( "X-Real-IP" );
+                } else {                        
+                    if ( strDomain.empty() )    strDomain = strRecordName;
+                    assert( !strDomain.empty() );
 
-                    if ( record.isNull() ) {
-                        ::std::cout << "update dns error with " 
-                                    << " zone Name "        << strZoneName          <<  ::std::endl
-                                    << " Record Name "      << strRecordName        <<  ::std::endl
-                                    << " domain "           << record.strDomain     <<  ::std::endl
-                                    << " ip "               << record.strIP         <<  ::std::endl;
-                    } else {
+                    if ( strIP.empty() )        strIP = con->get_request_header( "X-Real-IP" );
+                    assert( !strIP.empty() );
+
+                    // check ip update
+                    if ( m_pRecordDB && m_pRecordDB->checkUpdate( strZoneName, strRecordName, strIP ) ) {
+                        CDNSCommand::tagRecord  record;
+
+                        record.strDomain    = strDomain;
+                        record.strIP        = strIP;
                         if ( !strType.empty() )         record.strDNSType   = strType;
-                        if ( !strDomain.empty() )       record.strDomain    = strDomain;
-                        if ( !strIP.empty() )           record.strIP        = strIP;
                         if ( !strTTL.empty() )          record.uiTTL        = ::std::atoi( strTTL.c_str() );
                         if ( !strProxy.empty() )        record.bProxied     = ( ( strProxy == "true" ) || ( strProxy == "TRUE" ) );
 
-                        // check ip update
-                        auto search = m_mapDomains.find( record.strDomain );
-
-                        if ( search != m_mapDomains.end() && search->second == record.strIP ) {
-                            // no need to update
-                            ::std::cout << " skip this update " << record.strDomain << " with ip: " << record.strIP << ::std::endl;
-                        } else {
-                            if ( search == m_mapDomains.end() ) {
-                                // add new 
-                                m_mapDomains.emplace( record.strDomain, record.strIP );
-                            } else if ( search->second == record.strIP ){
-                                // update IP
-                                search->second = record.strIP;
-                            } 
-
-                            ::std::cout << "begin to update dns " << record.strDomain << " with ip: " << record.strIP << ::std::endl;
-                            record.strZoneID    = CCommand::chop( CDNSCommand::getZoneID( strZoneName, CConfig::getInstance()->authorization() ) );
-                            record.strRecordID  = CCommand::chop( CDNSCommand::getRecordID( record.strZoneID, strRecordName, CConfig::getInstance()->authorization() ) );
-                    
-                            if ( !CDNSCommand::updateDNSRecord( record, CConfig::getInstance()->authorization() ) ) {
-                                ::std::cout << "update dns error with updateDNSRecord" << ::std::endl;
-                            }       
-                        }                      
+                        ::std::cout << "begin to update dns " << record.strDomain << " with ip: " << record.strIP << ::std::endl;
+                        record.strZoneID    = CCommand::chop( CDNSCommand::getZoneID( strZoneName, CConfig::getInstance()->authorization() ) );
+                        record.strRecordID  = CCommand::chop( CDNSCommand::getRecordID( record.strZoneID, strRecordName, CConfig::getInstance()->authorization() ) );
+                
+                        if ( !CDNSCommand::updateDNSRecord( record, CConfig::getInstance()->authorization() ) ) {
+                            ::std::cout << "update dns error with updateDNSRecord" << ::std::endl;
+                        }
                     }
                 }
+            } else {
+                // other cmd
             }
+        } else {
+            // no cmd
         }
         
         std::stringstream ss;

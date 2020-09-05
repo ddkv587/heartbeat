@@ -72,6 +72,7 @@ namespace HeartBeat
         {
             m_iPort     = 8080;
             m_strName   = "admin";
+            m_strDataBasePath = "./record.db";
             m_certificateConfig.certificateChainPath( "./nibiru.com.cert.pem" );
             m_certificateConfig.privateKeyPath( "./nibiru.com.key.pem" );
             m_certificateConfig.dhparamPath( "./dh.pem" );
@@ -96,6 +97,9 @@ namespace HeartBeat
         inline void                         password( const ::std::string& strPassword )    { m_strPassword = strPassword; }
         inline const ::std::string&         password() const                                { return m_strPassword; }
         ::std::string                       passwordcbk( std::size_t max_length, asio::ssl::context::password_purpose purpose ) const { return m_strPassword; }
+
+        inline void                         dbPath( const ::std::string& strPath )          { m_strDataBasePath = strPath; }
+        inline const ::std::string&         dbPath() const                                  { return m_strDataBasePath; }
 
         inline void                         authorization( const ::std::string& strKey )    { m_strAuthorization = strKey; }
         inline const ::std::string&         authorization() const                           { return m_strAuthorization; }
@@ -137,6 +141,9 @@ namespace HeartBeat
         unsigned short                      m_iPort;
         ::std::string                       m_strName;
         ::std::string                       m_strPassword;
+
+        // for database
+        ::std::string                       m_strDataBasePath;
 
         // for dns authorization
         ::std::string                       m_strAuthorization;

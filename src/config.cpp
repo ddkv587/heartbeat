@@ -32,6 +32,8 @@ namespace HeartBeat
         if ( ::Json::Value::null != root["password"] )          m_strPassword = root["password"].asString();
         if ( ::Json::Value::null != root["authorization"] )     m_strAuthorization = root["authorization"].asString();
 
+        if ( ::Json::Value::null != root["database"] )          m_strDataBasePath = root["database"].asString();
+
         if ( ::Json::Value::null != root["certificateChain"] )  m_certificateConfig.certificateChainPath( root["certificateChain"].asString() );
         if ( ::Json::Value::null != root["privateKey"] )        m_certificateConfig.privateKeyPath( root["privateKey"].asString() );
         if ( ::Json::Value::null != root["dhparam"] )           m_certificateConfig.dhparamPath( root["dhparam"].asString() );

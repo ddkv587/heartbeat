@@ -17,7 +17,7 @@ namespace HeartBeat
 
         virtual ~CHeartBeat()
         {
-            ;
+            unInitilalize();
         }
 
         bool initilalize()
@@ -37,21 +37,32 @@ namespace HeartBeat
 
         void unInitilalize()
         {
+            ::std::cout << "CHeartBeat unInitilalize" << ::std::endl;
             unregisterHander();
+
+            m_server.stop();
+            while( !m_server.stopped() );
+
+            if ( m_session ) {
+                ::std::cout << "~CHeartBeat" << ::std::endl;
+                m_session->uninitialize();
+                delete m_session;
+                m_session = NULL;
+            }
         }
 
         void registerSession( ISession* session )
         {
             if ( session == m_session ) return;
-
-            if ( m_session ) m_session->uninitialize( &m_server );
+            if ( m_session ) m_session->uninitialize();
 
             m_session = session;
+            m_session->initialize();
         }
 
         void unregisterSession()
         {
-            if ( m_session ) m_session->uninitialize( &m_server );
+            if ( m_session ) m_session->uninitialize();
             m_session = NULL;
         }
 
@@ -83,8 +94,7 @@ namespace HeartBeat
             m_server.run();
         }
 
-    protected:
-        
+    protected:   
 
     private:
         _server         m_server;
