@@ -1,0 +1,13 @@
+{
+    "port": 8080,
+    "name": "admin",
+    "password": "ddkV587",
+    "authorization": "Ue5Szx2T432lFzkFcC6IJodAvlpqHcus0BedI8iQ",
+    "keychain": "nibiru",
+
+    "database": "./record.db",
+
+    "certificateChain": "./nibiru.com.cert.pem",
+    "privateKey": "./nibiru.com.key.pem",
+    "dhparam": "./dh.pem"
+}
