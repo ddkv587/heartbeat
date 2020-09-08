@@ -27,7 +27,6 @@ namespace HeartBeat
     void CHeartBeatSession::onHttp( _server* sever, websocketpp::connection_hdl hdl ) 
     {
         std::cout << "on_http called with hdl: " << hdl.lock().get() << ::std::endl;
-        
         _server::connection_ptr con = sever->get_con_from_hdl( hdl );
 
         std::cout << "on_http remote: "                   << con->get_remote_endpoint() 
@@ -40,6 +39,7 @@ namespace HeartBeat
                     << ", request body: " 					<< con->get_request_body()
                     << ::std::endl;
 
+        EErrorType status = ET_NO_ERROR;
         if ( !con->get_request_header( "X-Request-CMD" ).empty() ) {
             int cmdType         = ::std::stoi( con->get_request_header( "X-Request-CMD" ), 0, 16 );
 
@@ -47,6 +47,7 @@ namespace HeartBeat
                 // request
                 ::std::string strZoneName   = con->get_request_header( "X-Request-DNS-ZoneName" );
                 ::std::string strRecordName = con->get_request_header( "X-Request-DNS-RecordName" );
+                ::std::string strKeyChain   = con->get_request_header( "X-Request-DNS-KeyChain" );
                 
                 // optional
                 ::std::string strType       = con->get_request_header( "X-Request-DNS-Type" );
@@ -55,10 +56,15 @@ namespace HeartBeat
                 ::std::string strTTL        = con->get_request_header( "X-Request-DNS-TTL" );
                 ::std::string strProxy      = con->get_request_header( "X-Request-DNS-Proxy" );
 
-                if ( strZoneName.empty() || strRecordName.empty() ) {
+                if ( !CConfig::getInstance()->checkKeyChain( strKeyChain ) ) {
+                    // key error
+                    status = ET_KEY_NOT_MATCH;
+                } else if ( strZoneName.empty() || strRecordName.empty() ) {
                     ::std::cout << "update dns error with empty "
                                 << " zone name "        << strZoneName          <<  ::std::endl
                                 << " Record name "      << strRecordName        <<  ::std::endl;
+
+                    status = ET_CONTENT_ERROR;
                 } else {                        
                     if ( strDomain.empty() )    strDomain = strRecordName;
                     assert( !strDomain.empty() );
@@ -82,14 +88,19 @@ namespace HeartBeat
                 
                         if ( !CDNSCommand::updateDNSRecord( record, CConfig::getInstance()->authorization() ) ) {
                             ::std::cout << "update dns error with updateDNSRecord" << ::std::endl;
+                            status = ET_DNS_UPDATE_ERROR;
                         }
+                    } else {
+                        ::std::cout << "skip this update with " << strDomain << "( " << strIP << " )" << ::std::endl;
                     }
                 }
             } else {
                 // other cmd
+                status = ET_CMD_NOT_SUPPORT;
             }
         } else {
             // no cmd
+            status = ET_REQUEST_ERROR;
         }
         
         std::stringstream ss;
@@ -99,7 +110,7 @@ namespace HeartBeat
             << "<title>Access 200 (Request Access)</title><body>"
             << "<h1>Access 200</h1>"
             << "<p>Your IP: " << con->get_request_header( "X-Real-IP" ) << ".</p>"
-            << "<p>The current time is " << std::ctime( &end_time ) << ".</p>"
+            << "<p>The current time is " << std::ctime( &end_time ) << status << ".</p>"
             << "</body></head></html>";
         
         con->set_body( ss.str() );

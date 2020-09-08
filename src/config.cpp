@@ -30,9 +30,11 @@ namespace HeartBeat
         if ( ::Json::Value::null != root["port"] )              m_iPort = ( unsigned short )root["port"].asUInt();
         if ( ::Json::Value::null != root["name"] )              m_strName = root["name"].asString();
         if ( ::Json::Value::null != root["password"] )          m_strPassword = root["password"].asString();
-        if ( ::Json::Value::null != root["authorization"] )     m_strAuthorization = root["authorization"].asString();
+        if ( ::Json::Value::null != root["keychain"] )          m_strKeyChain = root["keychain"].asString();
 
         if ( ::Json::Value::null != root["database"] )          m_strDataBasePath = root["database"].asString();
+
+        if ( ::Json::Value::null != root["authorization"] )     m_strAuthorization = root["authorization"].asString();
 
         if ( ::Json::Value::null != root["certificateChain"] )  m_certificateConfig.certificateChainPath( root["certificateChain"].asString() );
         if ( ::Json::Value::null != root["privateKey"] )        m_certificateConfig.privateKeyPath( root["privateKey"].asString() );
@@ -56,6 +58,10 @@ namespace HeartBeat
         root["port"] = m_iPort;
         root["name"] = m_strName;
         root["password"] = m_strPassword;
+        root["keychain"] = m_strKeyChain;
+
+        root["database"] = m_strDataBasePath;
+
         root["authorization"] = m_strAuthorization;
 
         root["certificateChain"] = m_certificateConfig.certificateChainPath();
@@ -64,5 +70,10 @@ namespace HeartBeat
 
         writer->write( root, &ofs );
         ofs.close();
+    }
+
+    bool CConfig::checkKeyChain( const ::std::string& strKeyChain )
+    {
+        return ( m_strKeyChain == strKeyChain );
     }
 }

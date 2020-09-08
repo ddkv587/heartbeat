@@ -4,8 +4,9 @@
 #define ASIO_STANDALONE
 #include <websocketpp/config/debug_asio.hpp>
 #include <websocketpp/server.hpp>
-
 #include <iostream>
+
+#include "error.hpp"
 
 namespace HeartBeat
 {

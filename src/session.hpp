@@ -19,7 +19,7 @@ namespace HeartBeat
 
         virtual ~ISession()
         {
-            ::std::cout << "ISession delete" << ::std::endl;
+            ;
         }
 
         virtual void                initialize() = 0;
@@ -114,7 +114,7 @@ namespace HeartBeat
                 int iCol = 0;
                 int iRow = 0;
                 ::std::vector<IDBInterface::tagValue> aryArgs;
-                ::std::vector<sqlite3_value *> result;
+                ::std::vector<IDBInterface::tagValue> result;
 
                 aryArgs.emplace_back( strZoneName );
                 aryArgs.emplace_back( strRecordName );
@@ -122,12 +122,12 @@ namespace HeartBeat
                     ::std::cout << "sql read error!" << ::std::endl;
                     return ::std::string();
                 } else {
-                    if ( 0 == iRow ) {
+                    if ( 0 == iRow || 0 == iCol ) {
                         return ::std::string();
                     } else {
                         if ( iRow > 1 && bSingle ) {
                             for ( int i = 0; i < ( iRow - 1 ); ++i ) {
-                                int id = sqlite3_value_int( result[ i * 2 ] );
+                                int id = result[ i * 2 ].iValue;
 
                                 aryArgs.clear();
                                 aryArgs.emplace_back( id );
@@ -135,7 +135,7 @@ namespace HeartBeat
                             }
                         }
 
-                        return ::std::string( reinterpret_cast< const char* >( sqlite3_value_text( result[ ( iRow - 1 ) * 2 + 1 ] ) ) );
+                        return result[ ( iRow - 1 ) * 2 + 1 ].strValue;
                     }
                 }
             }
@@ -190,7 +190,6 @@ namespace HeartBeat
 
         virtual ~CHeartBeatSession()
         {
-            ::std::cout << " session ~CHeartBeatSession" << ::std::endl;
             ;
         }
 
@@ -203,7 +202,6 @@ namespace HeartBeat
 
         virtual void uninitialize()
         {
-            ::std::cout << " session uninitialize" << ::std::endl;
             if ( m_pRecordDB ) {
                 delete m_pRecordDB;
                 m_pRecordDB = NULL;
@@ -222,17 +220,17 @@ namespace HeartBeat
 
         virtual void onMessage( _server* sever, websocketpp::connection_hdl hdl, _message_ptr msg ) 
         {
-            std::cout << "on_message called with hdl: " << hdl.lock().get()
+            ::std::cout << "on_message called with hdl: " << hdl.lock().get()
                     << " and message: " << msg->get_payload()
                     << std::endl;
 
             _server::connection_ptr con = sever->get_con_from_hdl(hdl);
-            std::cout << "on_message remote: " << con->get_remote_endpoint() << ::std::endl;
+            ::std::cout << "on_message remote: " << con->get_remote_endpoint() << ::std::endl;
 
             try {
                 sever->send( hdl, msg->get_payload(), msg->get_opcode() );
             } catch ( websocketpp::exception const & e ) {
-                std::cout << "Echo failed because: "
+                ::std::cout << "Echo failed because: "
                         << "(" << e.what() << ")" << std::endl;
             }
         }
@@ -243,8 +241,8 @@ namespace HeartBeat
         {
             namespace asio = websocketpp::lib::asio;
 
-            std::cout << "on_tls_init called with hdl: " << hdl.lock().get() << std::endl;
-            std::cout << "using TLS mode: " << ( CConfig::TM_MOZILLA_MODERN == mode ? "Mozilla Modern" : "Mozilla Intermediate" ) << std::endl;
+            ::std::cout << "on_tls_init called with hdl: " << hdl.lock().get() << std::endl;
+            ::std::cout << "using TLS mode: " << ( CConfig::TM_MOZILLA_MODERN == mode ? "Mozilla Modern" : "Mozilla Intermediate" ) << std::endl;
 
             _context_ptr ctx = websocketpp::lib::make_shared< asio::ssl::context >( asio::ssl::context::sslv23 );
 
@@ -268,14 +266,14 @@ namespace HeartBeat
                 ctx->use_tmp_dh_file( CConfig::getInstance()->certificate().dhparamPath() );
                 
                 if ( SSL_CTX_set_cipher_list( ctx->native_handle(), CConfig::getInstance()->ciphers( mode ).c_str() ) != 1 ) {
-                    std::cout << "Error setting cipher list" << std::endl;
+                    ::std::cout << "Error setting cipher list" << std::endl;
                 }
             } catch ( std::exception& e ) {
-                std::cout   << "onTlsInit Exception: " << e.what() 
+                ::std::cout   << "onTlsInit Exception: " << e.what() 
                             << " , chain: " << CConfig::getInstance()->certificate().certificateChainPath()
                             << " , private: " << CConfig::getInstance()->certificate().privateKeyPath()
                             << " , dh " << CConfig::getInstance()->certificate().dhparamPath()
-                            << std::endl;
+                            << ::std::endl;
             }
 
             return ctx;

@@ -95,21 +95,16 @@ namespace HeartBeat
 
             tagValue( const tagValue&& value )
             {
-                ::std::cout << "tagValue move costruct" << ::std::endl;
-                
                 type = value.type;
 
                 switch(type) {
                 case VT_INT:
-                ::std::cout << "tagValue move costruct1" << ::std::endl;
                     iValue = value.iValue;
                     break;
                 case VT_INT64:
-                ::std::cout << "tagValue move costruct2" << ::std::endl;
                     i64Value = value.i64Value;
                     break;
                 case VT_TEXT:
-                ::std::cout << "tagValue move costruct3" << ::std::endl;
                     strValue = value.strValue;
                     break;  
                 }
@@ -146,7 +141,7 @@ namespace HeartBeat
         virtual bool dbiInsert( int key, const ::std::vector<tagValue>& aryArgs ) = 0;
         virtual bool dbiUpdate( int key, const ::std::vector<tagValue>& aryArgs ) = 0;
         virtual bool dbiDelete( int key, const ::std::vector<tagValue>& aryArgs ) = 0;
-        virtual bool dbiRead( int key, const ::std::vector<tagValue>& aryArgs, ::std::vector<sqlite3_value *>& result, int& iCol, int& iRow ) = 0;  
+        virtual bool dbiRead( int key, const ::std::vector<tagValue>& aryArgs, ::std::vector<tagValue>& result, int& iCol, int& iRow ) = 0;  
     };
 
     class CSqlLiteDB : public IDBInterface
@@ -170,8 +165,6 @@ namespace HeartBeat
         virtual ~CSqlLiteDB()
         {
             uninitialize();
-
-            ::std::cout << "close db" << ::std::endl;
 
             sqlite3_close( m_pDB );  
         }
@@ -273,7 +266,7 @@ namespace HeartBeat
             return sqlDelete( m_aryDeleteStmt[key], aryArgs );
         }
 
-        virtual bool dbiRead( int key, const ::std::vector<tagValue>& aryArgs, ::std::vector<sqlite3_value *>& result, int& iCol, int& iRow )
+        virtual bool dbiRead( int key, const ::std::vector<tagValue>& aryArgs, ::std::vector<tagValue>& result, int& iCol, int& iRow )
         {
             if ( !m_bInitialized || m_aryReadStmt.size() <= key )  return false;
 
@@ -537,7 +530,7 @@ namespace HeartBeat
             return true;
         }
 
-        bool sqlRead( sqlite3_stmt* stmt, const ::std::vector<tagValue>& aryArgs, ::std::vector<sqlite3_value *>& result, int& iCol, int& iRow )
+        bool sqlRead( sqlite3_stmt* stmt, const ::std::vector<tagValue>& aryArgs, ::std::vector<tagValue>& result, int& iCol, int& iRow )
         {
             if ( !stmt || 0 == aryArgs.size() ) return false;
 
@@ -570,11 +563,25 @@ namespace HeartBeat
                     break;
                 case SQLITE_ROW:
                     //result
-                    iCol = sqlite3_column_count( stmt );
-                    for ( int i = 0; i < iCol; ++i ) {
-                        result.push_back( sqlite3_column_value( stmt, i ) );
+                    {
+                        int iRealCol = sqlite3_column_count( stmt );
+                        for ( int i = 0; i < iRealCol; ++i ) {
+                            switch( sqlite3_column_type( stmt, i ) )
+                            {
+                            case SQLITE_INTEGER:
+                                result.emplace_back( sqlite3_column_int( stmt, i ) );
+                                ++iCol;
+                                break;
+                            case SQLITE_TEXT:
+                                result.emplace_back( reinterpret_cast< const char* >( sqlite3_column_text( stmt, i ) ) );
+                                ++iCol;
+                                break;
+                            default:
+                                break;
+                            }
+                        }
+                        ++iRow;
                     }
-                    ++iRow;
                     break;
                 case SQLITE_ERROR:
                     result.clear();
