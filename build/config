@@ -1,0 +1,13 @@
+export PROJECT_NAME=HeartBeat
+export BUILD_CHAIN_ROOT=
+
+export PLATFROM=linux
+export PLATFROM_MACRO="-DOS_LINUX"
+
+export ROOT_PATH=`pwd`/..
+export SOURCE_ROOT=${ROOT_PATH}/src
+
+export SYSROOT=
+
+export CPP=/usr/bin/g++
+

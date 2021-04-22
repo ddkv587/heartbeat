@@ -1,0 +1,13 @@
+{
+    "port": 8080,
+    "name": "admin",
+    "password": "xxxxxx",
+    "authorization": "xxxxxxxxx",
+    "keychain": "nibiru",
+
+    "database": "./record.db",
+
+    "certificateChain": "./nibiru.com.cert.pem",
+    "privateKey": "./nibiru.com.key.pem",
+    "dhparam": "./dh.pem"
+}
